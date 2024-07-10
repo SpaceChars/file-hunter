@@ -1,0 +1,19 @@
+{
+    "manifest_version": 3,
+    "name": "File Hunter",
+    "description": "File Hunter",
+    "version": "1.0",
+    "author": {
+        "email": "2388160949@qq.com"
+    },
+    "action": {
+        "default_popup": "popup/index.html",
+        "default_icon": "logo.png"
+    },
+    "permissions": ["activeTab", "tabs", "downloads", "webRequest", "storage", "unlimitedStorage"],
+    "host_permissions": ["*://*/*"],
+    "background": {
+        "service_worker": "background/service-worker.js",
+        "type": "module"
+    }
+}

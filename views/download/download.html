@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>下载列表</title>
+        <link rel="icon" href="/logo.png" />
+        <link rel="stylesheet" href="./download.css" />
+    </head>
+    <body>
+        <template id="item_template">
+            <div class="item">
+                <img class="icon" src="" alt="" srcset="" />
+                <div class="detail-info">
+                    <div class="header-info">
+                        <div class="name"></div>
+                        <div class="opration">
+                            <div class="btn download">下载</div>
+                        </div>
+                    </div>
+                    <div class="url"></div>
+                </div>
+            </div>
+        </template>
+        <div id="container">
+            <div class="header">
+                <div class="btn download-all">开始下载</div>
+                <div class="btn refresh">刷新</div>
+            </div>
+
+            <div class="content"></div>
+            <div class="footer"></div>
+        </div>
+        <script src="/plugins/jszip.min.js"></script>
+        <script src="./download.js"></script>
+    </body>
+</html>

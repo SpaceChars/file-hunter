@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>File Hunter 设置</title>
+        <link rel="icon" href="/logo.png" />
+        <link rel="stylesheet" href="./setting.css" />
+    </head>
+    <body>
+        <div id="container">
+            <div class="setting-item">
+                <div class="header">
+                    <div class="title">过滤类型</div>
+                </div>
+                <div class="content">
+                    <div class="type-item">
+                        <input type="checkbox" name="sub_frame,main_frame" id="sub_frame" />
+                        <label for="sub_frame">Iframe</label>
+                    </div>
+                    <div class="type-item">
+                        <input type="checkbox" name="image" id="image" />
+                        <label for="image">Image</label>
+                    </div>
+                    <div class="type-item">
+                        <input type="checkbox" name="font" id="font" />
+                        <label for="font">Fonts</label>
+                    </div>
+                    <div class="type-item">
+                        <input type="checkbox" name="xmlhttprequest" id="xmlhttprequest" />
+                        <label for="xmlhttprequest">XHR</label>
+                    </div>
+                    <div class="type-item">
+                        <input type="checkbox" name="media" id="media" />
+                        <label for="media">Media</label>
+                    </div>
+                    <div class="type-item">
+                        <input type="checkbox" name="websocket" id="websocket" />
+                        <label for="websocket">Web Socket</label>
+                    </div>
+                    <div class="type-item">
+                        <input
+                            type="checkbox"
+                            name="other,webbundle,csp_report,ping,object"
+                            id="other"
+                        />
+                        <label for="other">Web Socket</label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script src="/scripts/Request.js"></script>
+        <script src="./setting.js"></script>
+    </body>
+</html>
