@@ -11,12 +11,17 @@
     <body>
         <template id="item_template">
             <div class="item">
-                <img class="icon" src="" alt="" srcset="" />
+                <img class="icon" src="" srcset="" />
                 <div class="detail-info">
                     <div class="header-info">
-                        <div class="name"></div>
+                        <div class="info">
+                            <div class="name"></div>
+                            <div class="type"></div>
+                            <div class="method"></div>
+                        </div>
                         <div class="opration">
                             <div class="btn download">下载</div>
+                            <div class="btn fetch">访问</div>
                         </div>
                     </div>
                     <div class="url"></div>
@@ -27,11 +32,13 @@
             <div class="header">
                 <div class="btn download-all">开始下载</div>
                 <div class="btn refresh">刷新</div>
+                <div class="btn setting">设置</div>
             </div>
 
             <div class="content"></div>
             <div class="footer"></div>
         </div>
+        <script src="/scripts/window.js"></script>
         <script src="/plugins/jszip.min.js"></script>
         <script src="./download.js"></script>
     </body>

@@ -31,8 +31,8 @@ function onWatchFilterTypes() {
                 }
                 storage[filterStorageKey] = array;
                 chrome.storage.local.set(storage);
-                
-                onWatchRequest(array);
+
+                chrome.runtime.sendMessage({ env: "updateRequestType", data: array });
             });
         });
     });

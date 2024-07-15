@@ -1,39 +1,65 @@
-/**
- * 渲染文件列表
- * @param {*} files
- */
-function createFileList(files) {
-    const template = document.getElementById("item_template");
-
-    document.querySelector(".content").innerHTML = "";
-
-    files.forEach((url) => {
-        const fileName = new URL(url).pathname.split("/").pop();
-
-        const itemEl = template.content.firstElementChild.cloneNode(true);
-        itemEl.querySelector(".name").innerText = fileName;
-
-        itemEl.querySelector(".url").innerText = url;
-        itemEl.querySelector(".icon").src = url;
-
-        document.querySelector(".content").appendChild(itemEl);
-
-        watchDownloadBtn(itemEl.querySelector(".download"), url);
-    });
-}
+var allDownloading = false;
 
 /**
  * 刷新文件列表
  */
-function onRefresh() {
+function onRefresh(tabId) {
     const tabStorageKey = "TAB_" + tabId;
     chrome.storage.local.get(tabStorageKey).then((storage) => {
-        const files = storage[tabStorageKey] || [];
+        const requests = storage[tabStorageKey] || [];
 
-        document.querySelector(".footer").innerText = "总计：" + files.length + "个文件";
+        document.querySelector(".footer").innerText = "总计：" + requests.length + "个文件";
 
-        createFileList(files);
-        watchDownloadAllBtn(files);
+        createFileList(requests);
+        watchDownloadAllBtn(requests);
+    });
+    watchSettingBtn();
+}
+
+/**
+ * 渲染文件列表
+ * @param {*} files
+ */
+function createFileList(requests) {
+    const template = document.getElementById("item_template");
+
+    document.querySelector(".content").innerHTML = "";
+
+    requests.forEach((details) => {
+        const itemEl = template.content.firstElementChild.cloneNode(true);
+
+        //基础信息
+        itemEl.querySelector(".name").innerText = details.name;
+        itemEl.querySelector(".url").innerText = details.url;
+        itemEl.querySelector(".url").title = details.url;
+        itemEl.querySelector(".type").innerText = details.type;
+        itemEl.querySelector(".method").innerText = details.method;
+
+        itemEl.querySelector(".icon").src = details.type == "image" ? details.url : "/logo.png";
+        itemEl.querySelector(".icon").addEventListener("error", () => {
+            itemEl.querySelector(".icon").src = "/logo.png";
+        });
+
+        //操作按钮权限
+        itemEl.querySelectorAll(".opration .btn").forEach((node) => {
+            if (
+                node.classList.contains("download") &&
+                (details.type == "image" || details.type == "font")
+            ) {
+                node.style.display = "block";
+                watchDownloadBtn(itemEl.querySelector(".download"), details.url);
+            } else if (
+                node.classList.contains("fetch") &&
+                details.type != "image" &&
+                details.type != "font" &&
+                details.method == "GET"
+            ) {
+                node.style.display = "block";
+                watchFetchBtn(itemEl.querySelector(".fetch"), details.url);
+            }
+        });
+
+        document.querySelector(".content").appendChild(itemEl);
     });
 }
 
@@ -42,7 +68,19 @@ function onRefresh() {
  */
 function watchRefreshBtn() {
     document.querySelector(".refresh").addEventListener("click", () => {
-        onRefresh();
+        //获取需要下载tab页
+        chrome.storage.local.get("download_page_tab").then((storage) => {
+            onRefresh(storage["download_page_tab"] || 0);
+        });
+    });
+}
+
+//监听访问事件
+function watchFetchBtn(el, url) {
+    el.addEventListener("click", () => {
+        chrome.windows.create({
+            url,
+        });
     });
 }
 
@@ -62,10 +100,16 @@ function watchDownloadBtn(el, url) {
  * 监听下载全部按钮
  * @param  files
  */
-function watchDownloadAllBtn(files) {
+function watchDownloadAllBtn(requests) {
     document.querySelector(".download-all").addEventListener("click", () => {
         if (allDownloading) return;
         allDownloading = true;
+
+        //筛选可下载请求
+        const files = requests.filter(
+            (details) => details.type == "image" || details.type == "font"
+        );
+        if (!files.length) return alert("无可下载资源！");
 
         document.querySelector(".download-all").innerText = "开始下载中";
 
@@ -74,16 +118,16 @@ function watchDownloadAllBtn(files) {
             zipFileName = folderName + ".zip",
             zipFolder = zip.folder(folderName);
 
-        files.forEach((url, index, array) => {
+        files.forEach((details, index, array) => {
             //获取文件
-            fetch(new Request(url))
+            fetch(new Request(details.url))
                 .then((response) => response.blob())
                 .then((file) => {
                     //加载文件
                     var reader = new FileReader();
                     reader.onloadend = function (e) {
                         //将文件添加进压缩包
-                        zipFolder.file(new URL(url).pathname.split("/").pop(), e.target.result);
+                        zipFolder.file(details.name, e.target.result);
 
                         //判断是否是最后一个文件，如果是，则下载压缩包
                         if (index == array.length - 1) {
@@ -106,7 +150,26 @@ function watchDownloadAllBtn(files) {
     });
 }
 
-const tabId = new URL(window.location.href).searchParams.get("tabId");
-var allDownloading = false;
+/**
+ * 监听设置按钮
+ * @param  files
+ */
+function watchSettingBtn() {
+    document.querySelector(".setting").addEventListener("click", () => {
+        openWindow("setting");
+    });
+}
 
-onRefresh();
+/**
+ * 监听更新下载列表事件
+ */
+chrome.runtime.onMessage.addListener((request) => {
+    if (request.env == "updateDonwloadList") {
+        onRefresh(request.data);
+    }
+});
+
+//获取需要下载tab页
+chrome.storage.local.get("download_page_tab").then((storage) => {
+    onRefresh(storage["download_page_tab"] || 0);
+});

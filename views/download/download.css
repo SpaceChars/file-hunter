@@ -57,11 +57,10 @@ body {
 .content .item .detail-info {
     flex-grow: 1;
 
-    width: 100%;
-
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    overflow: hidden;
 }
 
 .content .item .header-info {
@@ -69,6 +68,35 @@ body {
 
     display: flex;
     justify-content: space-between;
+}
+
+.content .item .header-info .info {
+    display: flex;
+    align-items: center;
+    column-gap: 10px;
+}
+
+.content .item .header-info .info .name {
+    font-size: 12px;
+    line-height: 12px;
+}
+
+.content .item .header-info .info .type {
+    background: #1e90ff;
+    color: #ffffff;
+
+    padding: 2px 5px;
+    font-size: 12px;
+    line-height: 12px;
+}
+
+.content .item .header-info .info .method {
+    background: #ff7f50;
+    color: #ffffff;
+
+    padding: 2px 5px;
+    font-size: 12px;
+    line-height: 12px;
 }
 
 .content .item .header-info .opration {
@@ -79,6 +107,8 @@ body {
 .content .item .header-info .opration .btn {
     color: #1e90ff;
     cursor: pointer;
+
+    display: none;
 }
 
 .content .item .header-info .opration .btn:hover {
