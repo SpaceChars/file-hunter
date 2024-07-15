@@ -32,7 +32,7 @@ function onWatchFilterTypes() {
                 storage[filterStorageKey] = array;
                 chrome.storage.local.set(storage);
 
-                chrome.runtime.sendMessage({ env: "updateRequestType", data: array });
+                chrome.runtime.sendMessage({ env: "reobserveWatch", data: array });
             });
         });
     });

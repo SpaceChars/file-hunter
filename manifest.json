@@ -8,7 +8,7 @@
     },
     "action": {
         "default_popup": "popup/index.html",
-        "default_icon": "logo.png"
+        "default_icon": "images/logo.png"
     },
     "permissions": ["activeTab", "tabs", "downloads", "webRequest", "storage", "unlimitedStorage"],
     "host_permissions": ["*://*/*"],

@@ -31,6 +31,11 @@ body {
     background: rgba(30, 144, 255, 0.2);
 }
 
+.item .icon {
+    height: 15px;
+    margin-right: 5px;
+}
+
 .item .name {
     font-size: 14px;
     line-height: 25px;

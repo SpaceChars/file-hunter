@@ -18,11 +18,11 @@ document.querySelector(".item:nth-child(1)").addEventListener("click", () => {
 });
 
 /**
- * 重新加载当前页
+ * 清除缓存
  */
 document.querySelector(".item:nth-child(2)").addEventListener("click", () => {
-    chrome.tabs.query({ active: true, lastFocusedWindow: true }, async ([tab]) => {
-        chrome.tabs.reload(tab.id), { bypassCache: true };
+    chrome.storage.local.get().then((storage) => {
+        chrome.storage.local.remove(Object.keys(storage));
     });
 });
 

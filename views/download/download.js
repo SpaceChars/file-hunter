@@ -1,53 +1,83 @@
 var allDownloading = false;
+let activeTab = null;
 
 /**
  * 刷新文件列表
  */
-function onRefresh(tabId) {
-    const tabStorageKey = "TAB_" + tabId;
-    chrome.storage.local.get(tabStorageKey).then((storage) => {
-        const requests = storage[tabStorageKey] || [];
+function onRefresh(tabs) {
+    createView(tabs);
+    watchDownloadAllBtn(tabs);
 
-        document.querySelector(".footer").innerText = "总计：" + requests.length + "个文件";
-
-        createFileList(requests);
-        watchDownloadAllBtn(requests);
-    });
     watchSettingBtn();
 }
 
 /**
- * 渲染文件列表
- * @param {*} files
+ * 创建Tab视图
+ * @param {*} tabs
  */
-function createFileList(requests) {
+function createTabsView(tabs) {
+    const template = document.getElementById("item_template");
+
+    document.querySelector(".tabs").innerHTML = "";
+    const list = Object.values(tabs);
+
+    list.forEach((tabInfo) => {
+        const tabEl = template.content.querySelector(".tab").cloneNode(true);
+        tabEl.querySelector("icon").src = tabInfo.icon;
+        tabEl.querySelector(".name").innerText = tabInfo.name;
+
+        tabEl.addEventListener("click", () => {
+            activeTab = tabInfo.id;
+            createTabsView(tabs);
+        });
+
+        document.querySelector(".tabs").appendChild(tabEl);
+    });
+    createRequestListView((tabs[activeTab] || tabs[(list[0] || {}).id] || {}).requests || []);
+}
+
+/**
+ * 创建请求列表视图
+ * @param {*} requests
+ */
+function createRequestListView(requests) {
     const template = document.getElementById("item_template");
 
     document.querySelector(".content").innerHTML = "";
+    if (!requests.length) return;
 
     requests.forEach((details) => {
-        const itemEl = template.content.firstElementChild.cloneNode(true);
+        const dataItemEl = template.content.querySelector(".item").cloneNode(true);
 
-        //基础信息
-        itemEl.querySelector(".name").innerText = details.name;
-        itemEl.querySelector(".url").innerText = details.url;
-        itemEl.querySelector(".url").title = details.url;
-        itemEl.querySelector(".type").innerText = details.type;
-        itemEl.querySelector(".method").innerText = details.method;
+        dataItemEl.querySelector(".name").innerText = details.name;
 
-        itemEl.querySelector(".icon").src = details.type == "image" ? details.url : "/logo.png";
-        itemEl.querySelector(".icon").addEventListener("error", () => {
-            itemEl.querySelector(".icon").src = "/logo.png";
+        dataItemEl.querySelector(".url").innerText = details.url;
+        dataItemEl.querySelector(".url").title = details.url;
+
+        dataItemEl.querySelector(".type").title = details.type;
+        dataItemEl.querySelector(".type").method = details.method;
+
+        dataItemEl.querySelector(".icon").src =
+            details.type == "image" ? details.url : "/images/logo.png";
+        dataItemEl.querySelector(".icon").addEventListener("error", () => {
+            dataItemEl.querySelector(".icon").src = "/images/logo.png";
         });
 
         //操作按钮权限
-        itemEl.querySelectorAll(".opration .btn").forEach((node) => {
+        dataItemEl.querySelectorAll(".opration .btn").forEach((node) => {
             if (
                 node.classList.contains("download") &&
                 (details.type == "image" || details.type == "font")
             ) {
                 node.style.display = "block";
-                watchDownloadBtn(itemEl.querySelector(".download"), details.url);
+                dataItemEl.querySelector(".download").addEventListener("click", () => {
+                    chrome.downloads.download(
+                        {
+                            url: details.url,
+                        },
+                        () => {}
+                    );
+                });
             } else if (
                 node.classList.contains("fetch") &&
                 details.type != "image" &&
@@ -55,11 +85,14 @@ function createFileList(requests) {
                 details.method == "GET"
             ) {
                 node.style.display = "block";
-                watchFetchBtn(itemEl.querySelector(".fetch"), details.url);
+                dataItemEl.querySelector(".fetch").addEventListener("click", () => {
+                    chrome.tabs.create({
+                        url,
+                    });
+                });
             }
         });
-
-        document.querySelector(".content").appendChild(itemEl);
+        document.querySelector(".content").appendChild(dataItemEl);
     });
 }
 
@@ -72,27 +105,6 @@ function watchRefreshBtn() {
         chrome.storage.local.get("download_page_tab").then((storage) => {
             onRefresh(storage["download_page_tab"] || 0);
         });
-    });
-}
-
-//监听访问事件
-function watchFetchBtn(el, url) {
-    el.addEventListener("click", () => {
-        chrome.windows.create({
-            url,
-        });
-    });
-}
-
-//监听下载事件
-function watchDownloadBtn(el, url) {
-    el.addEventListener("click", () => {
-        chrome.downloads.download(
-            {
-                url,
-            },
-            () => {}
-        );
     });
 }
 
@@ -163,13 +175,12 @@ function watchSettingBtn() {
 /**
  * 监听更新下载列表事件
  */
-chrome.runtime.onMessage.addListener((request) => {
-    if (request.env == "updateDonwloadList") {
-        onRefresh(request.data);
+chrome.runtime.onMessage.addListener((res) => {
+    if (res.env == "refreshDownLoadList") {
+        onRefresh(res.data);
     }
 });
 
-//获取需要下载tab页
-chrome.storage.local.get("download_page_tab").then((storage) => {
-    onRefresh(storage["download_page_tab"] || 0);
+chrome.storage.local.get("tabs_request").then((storage) => {
+    onRefresh(storage);
 });
