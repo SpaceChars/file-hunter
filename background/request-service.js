@@ -1,4 +1,4 @@
-const temp_requests = [];
+let temp_requests = [];
 let timer = null;
 
 /**
@@ -15,41 +15,44 @@ function requestCallback(info) {
         if (!temp_requests.length) return;
         //拷贝数据
         const temp_requests_clone = JSON.parse(JSON.stringify(temp_requests));
+        temp_requests = [];
 
         //处理数据
         chrome.storage.local.get(["tabs_request"]).then((storage) => {
             let storageTabs = storage["tabs_request"] || {};
 
             Promise.all(
-                temp_requests_clone.map((el) =>
-                    chrome.tabs.get(el.tabId).then((tab) => {
+                temp_requests_clone.map((el) => {
+                    console.log("-----el", el);
+                    return chrome.tabs.get(el.tabId).then((tab) => {
                         return {
                             name: tab.title,
                             icon: tab.favIconUrl,
                             id: tab.id,
                             requests: [],
                         };
-                    })
-                )
+                    });
+                })
             )
-                .then((tabs, index) => {
-                    const details = temp_requests_clone[index];
+                .then((tabs) => {
+                    tabs.forEach((tab, index) => {
+                        const details = temp_requests_clone[index];
 
-                    let tabInfo =
-                        storageTabs[details.tabId] || tabs.find((el) => el.id == details.tabId);
+                        let tabInfo = storageTabs[details.tabId] || tab;
 
-                    if (!tabInfo.requests.find((el) => el.url == details.url)) {
-                        let fileName = "",
-                            pathArray = new URL(details.url).pathname.split("/");
-                        while (!fileName) {
-                            fileName = pathArray.pop();
+                        if (!tabInfo.requests.find((el) => el.url == details.url)) {
+                            let fileName = "",
+                                pathArray = new URL(details.url).pathname.split("/");
+                            while (!fileName) {
+                                fileName = pathArray.pop();
+                            }
+                            details.name = fileName;
+
+                            tabInfo.requests.push(details);
                         }
-                        details.name = fileName;
 
-                        tabInfo.requests.push(details);
-                    }
-
-                    storageTabs[details.tabId] = tabInfo;
+                        storageTabs[details.tabId] = tabInfo;
+                    });
                 })
                 .finally(() => {
                     storage["tabs_request"] = storageTabs;
@@ -72,7 +75,7 @@ function onWatchRequest(types) {
 
     chrome.webRequest.onBeforeRequest.addListener(
         requestCallback,
-        { urls: ["<all_urls>"], types },
+        { urls: ["http://*/*", "https://*/*"], types },
         []
     );
 }

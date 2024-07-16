@@ -5,14 +5,10 @@ document.querySelector(".item:nth-child(1)").addEventListener("click", () => {
     chrome.tabs.query({ active: true, lastFocusedWindow: true }, async ([tab]) => {
         //获取下载列表页面
         const windowId = await getWindow("download");
-
-        //设置当前下载得tab页
-        chrome.storage.local.set({ download_page_tab: tab.id }).then(() => {
-            openWindow("download").then(() => {
-                if (windowId) {
-                    chrome.runtime.sendMessage({ env: "updateDonwloadList", data: tab.id });
-                }
-            });
+        openWindow("download").then(() => {
+            if (windowId) {
+                chrome.runtime.sendMessage({ env: "updateDonwloadList", data: tab.id });
+            }
         });
     });
 });
@@ -22,7 +18,9 @@ document.querySelector(".item:nth-child(1)").addEventListener("click", () => {
  */
 document.querySelector(".item:nth-child(2)").addEventListener("click", () => {
     chrome.storage.local.get().then((storage) => {
-        chrome.storage.local.remove(Object.keys(storage));
+        chrome.storage.local.remove(Object.keys(storage)).then(() => {
+            alert("已清除");
+        });
     });
 });
 

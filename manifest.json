@@ -11,7 +11,7 @@
         "default_icon": "images/logo.png"
     },
     "permissions": ["activeTab", "tabs", "downloads", "webRequest", "storage", "unlimitedStorage"],
-    "host_permissions": ["*://*/*"],
+    "host_permissions": ["http://*/*","https://*/*"],
     "background": {
         "service_worker": "background/service-worker.js",
         "type": "module"

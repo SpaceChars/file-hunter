@@ -9,8 +9,7 @@ const routers = [
     {
         name: "download",
         type: "popup",
-        width: 700,
-        height: 500,
+        state: "maximized",
         url: "/views/download/download.html",
     },
 ];
