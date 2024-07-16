@@ -1,11 +1,12 @@
 {
     "manifest_version": 3,
     "name": "File Hunter",
-    "description": "File Hunter",
+    "description": "The File Hunter extension is a great browser extension that retrieves resources by intercepting Web requests",
     "version": "1.0",
     "author": {
         "email": "2388160949@qq.com"
     },
+    "update_url": "https://raw.githubusercontent.com/SpaceChars/file-hunter/master/build/updates.xml",
     "action": {
         "default_popup": "popup/index.html",
         "default_icon": "images/logo.png"
